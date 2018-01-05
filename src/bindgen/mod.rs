@@ -39,6 +39,7 @@ mod builder;
 mod cargo;
 mod cdecl;
 mod config;
+mod ctyperesolver;
 mod dependencies;
 mod error;
 mod ir;

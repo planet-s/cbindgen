@@ -9,6 +9,7 @@ use syn;
 
 use bindgen::cdecl;
 use bindgen::config::Config;
+use bindgen::ctyperesolver::CTypeResolver;
 use bindgen::dependencies::Dependencies;
 use bindgen::ir::{Documentation, GenericParams, GenericPath, Path};
 use bindgen::library::Library;
@@ -486,6 +487,30 @@ impl Type {
                 ret.rename_for_config(config);
                 for arg in args {
                     arg.rename_for_config(config);
+                }
+            }
+        }
+    }
+
+    pub fn set_ctype(&mut self, resolver: &CTypeResolver) {
+        match self {
+            &mut Type::ConstPtr(ref mut ty) => {
+                ty.set_ctype(resolver);
+            }
+            &mut Type::Ptr(ref mut ty) => {
+                ty.set_ctype(resolver);
+            }
+            &mut Type::Path(ref mut path) => {
+                path.set_ctype(resolver);
+            }
+            &mut Type::Primitive(_) => {}
+            &mut Type::Array(ref mut ty, _) => {
+                ty.set_ctype(resolver);
+            }
+            &mut Type::FuncPtr(ref mut ret, ref mut args) => {
+                ret.set_ctype(resolver);
+                for arg in args {
+                    arg.set_ctype(resolver);
                 }
             }
         }

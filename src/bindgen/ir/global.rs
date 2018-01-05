@@ -7,6 +7,7 @@ use std::io::Write;
 use syn;
 
 use bindgen::config::Config;
+use bindgen::ctyperesolver::CTypeResolver;
 use bindgen::dependencies::Dependencies;
 use bindgen::ir::{AnnotationSet, Cfg, Documentation, Item, ItemContainer, Type};
 use bindgen::library::Library;
@@ -68,6 +69,10 @@ impl Item for Static {
 
     fn rename_for_config(&mut self, config: &Config) {
         self.ty.rename_for_config(config);
+    }
+
+    fn set_ctype(&mut self, resolver: &CTypeResolver) {
+        self.ty.set_ctype(resolver);
     }
 
     fn add_dependencies(&self, library: &Library, out: &mut Dependencies) {

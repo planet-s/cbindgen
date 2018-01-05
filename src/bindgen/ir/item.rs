@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 use std::mem;
 
 use bindgen::config::Config;
+use bindgen::ctyperesolver::CTypeResolver;
 use bindgen::dependencies::Dependencies;
 use bindgen::ir::{AnnotationSet, Cfg, Constant, Enum, OpaqueItem, Static, Struct, Type, Typedef,
                   Union};
@@ -21,6 +22,8 @@ pub trait Item {
 
     fn container(&self) -> ItemContainer;
 
+    fn populate_ctyperesolver(&self, _resolver: &mut CTypeResolver) { unimplemented!() }
+    fn set_ctype(&mut self, _resolver: &CTypeResolver) { unimplemented!() }
     fn rename_for_config(&mut self, _config: &Config) {}
     fn add_dependencies(&self, _library: &Library, _out: &mut Dependencies) {}
     fn instantiate_monomorph(

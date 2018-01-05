@@ -9,6 +9,7 @@ use syn;
 
 use bindgen::config::{Config, Language};
 use bindgen::ir::{AnnotationSet, Cfg, Documentation, Item, ItemContainer, Type};
+use bindgen::ctyperesolver::CTypeResolver;
 use bindgen::writer::{Source, SourceWriter};
 
 #[derive(Debug, Clone)]
@@ -127,6 +128,10 @@ impl Item for Constant {
 
     fn rename_for_config(&mut self, config: &Config) {
         config.export.rename(&mut self.name);
+    }
+
+    fn set_ctype(&mut self, resolver: &CTypeResolver) {
+        self.ty.set_ctype(resolver);
     }
 }
 

@@ -7,6 +7,7 @@ use std::io::Write;
 use syn;
 
 use bindgen::config::{Config, Language};
+use bindgen::ctyperesolver::CTypeResolver;
 use bindgen::dependencies::Dependencies;
 use bindgen::library::Library;
 use bindgen::ir::{AnnotationSet, Cfg, CfgWrite, Documentation, GenericParams, GenericPath, Item,
@@ -55,6 +56,7 @@ impl EnumVariant {
                     Type::Path(GenericPath {
                         name: "Tag".to_string(),
                         generics: vec![],
+                        ctype: None,
                     }),
                     Documentation::none(),
                 ));
@@ -117,6 +119,12 @@ impl EnumVariant {
     fn add_dependencies(&self, library: &Library, out: &mut Dependencies) {
         if let &Some((_, ref item)) = &self.body {
             item.add_dependencies(library, out);
+        }
+    }
+
+    fn set_ctype(&mut self, resolver: &CTypeResolver) {
+        if let Some((_, ref mut ty)) = self.body {
+            ty.set_ctype(resolver);
         }
     }
 }
@@ -209,6 +217,22 @@ impl Item for Enum {
         ItemContainer::Enum(self.clone())
     }
 
+    fn populate_ctyperesolver(&self, resolver: &mut CTypeResolver) {
+        if self.tag.is_some() && self.repr.style == ReprStyle::C {
+            resolver.add_struct(&self.name);
+        } else if self.tag.is_some() && self.repr.style != ReprStyle::C {
+            resolver.add_union(&self.name);
+        } else {
+            resolver.add_enum(&self.name);
+        }
+    }
+
+    fn set_ctype(&mut self, resolver: &CTypeResolver) {
+        for &mut ref mut var in &mut self.variants {
+            var.set_ctype(resolver);
+        }
+    }
+
     fn rename_for_config(&mut self, config: &Config) {
         config.export.rename(&mut self.name);
 
@@ -221,6 +245,7 @@ impl Item for Enum {
                         body.fields[0].1 = Type::Path(GenericPath {
                             name: new_tag.clone(),
                             generics: vec![],
+                            ctype: None,
                         });
                     }
                 }
@@ -308,12 +333,16 @@ impl Source for Enum {
         };
 
         if config.language == Language::C {
-            if size.is_none() {
-                out.write("typedef enum");
-            } else {
-                write!(out, "enum {}", enum_name);
+            if size.is_none() && config.style.generate_typedef() {
+                out.write("typedef ");
             }
-        } else {
+
+            out.write("enum");
+
+            if !size.is_none() || config.style.generate_tag() {
+                write!(out, " {}", enum_name);
+            }
+         } else {
             if let Some(prim) = size {
                 write!(out, "enum class {} : {}", enum_name, prim);
             } else {
@@ -333,7 +362,7 @@ impl Source for Enum {
             out.write("Sentinel /* this must be last for serialization purposes. */");
         }
 
-        if config.language == Language::C && size.is_none() {
+        if config.language == Language::C && size.is_none() && config.style.generate_typedef() {
             out.close_brace(false);
             write!(out, " {};", enum_name);
         } else {
@@ -361,11 +390,16 @@ impl Source for Enum {
             out.new_line();
 
             if config.language == Language::C {
-                write!(
-                    out,
-                    "typedef {}",
-                    if separate_tag { "struct" } else { "union" }
-                );
+                if config.style.generate_typedef() {
+                    out.write("typedef ");
+                }
+
+                out.write(if separate_tag { "struct" } else { "union" });
+
+                if config.style.generate_tag() {
+                    write!(out, " {}", self.name);
+                }
+
                 out.open_brace();
             }
 
@@ -376,6 +410,10 @@ impl Source for Enum {
             if wrap_tag {
                 out.write("struct");
                 out.open_brace();
+            }
+
+            if config.language == Language::C && !config.style.generate_typedef() {
+                out.write("enum ");
             }
 
             write!(out, "{} tag;", enum_name);
@@ -399,7 +437,11 @@ impl Source for Enum {
                 if i != 0 {
                     out.new_line();
                 }
-                write!(out, "{} {};", body.name, field_name);
+                if config.style.generate_typedef() {
+                    write!(out, "{} {};", body.name, field_name);
+                } else {
+                    write!(out, "struct {} {};", body.name, field_name);
+                }
             }
 
             if separate_tag {
@@ -407,8 +449,12 @@ impl Source for Enum {
             }
 
             if config.language == Language::C {
-                out.close_brace(false);
-                write!(out, " {};", self.name);
+                if config.style.generate_typedef() {
+                    out.close_brace(false);
+                    write!(out, " {};", self.name);
+                } else {
+                    out.close_brace(true);
+                }
             } else {
                 out.close_brace(true);
             }
