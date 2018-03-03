@@ -21,7 +21,7 @@ pub enum PrimitiveType {
     Void,
     Bool,
     Char,
-    WChar,
+    //WChar,
     SChar,
     UChar,
     Short,
@@ -44,7 +44,7 @@ pub enum PrimitiveType {
     Int64,
     Float,
     Double,
-    SizeT,
+    //SizeT,
 }
 
 impl PrimitiveType {
@@ -65,7 +65,7 @@ impl PrimitiveType {
             "c_ulong" => Some(PrimitiveType::ULong),
             "c_ulonglong" => Some(PrimitiveType::ULongLong),
             "bool" => Some(PrimitiveType::Bool),
-            "char" => Some(PrimitiveType::WChar),
+            //"char" => Some(PrimitiveType::WChar),
             "usize" | "uintptr_t" => Some(PrimitiveType::USize),
             "u8" | "uint8_t" => Some(PrimitiveType::UInt8),
             "u16" | "uint16_t" => Some(PrimitiveType::UInt16),
@@ -78,7 +78,7 @@ impl PrimitiveType {
             "i64" | "int64_t" => Some(PrimitiveType::Int64),
             "f32" => Some(PrimitiveType::Float),
             "f64" => Some(PrimitiveType::Double),
-            "size_t" => Some(PrimitiveType::SizeT),
+            //"size_t" => Some(PrimitiveType::SizeT),
             _ => None,
         }
     }
@@ -97,7 +97,7 @@ impl PrimitiveType {
             &PrimitiveType::UInt => "c_uint",
             &PrimitiveType::ULong => "c_ulong",
             &PrimitiveType::ULongLong => "c_ulonglong",
-            &PrimitiveType::WChar => "char",
+            //&PrimitiveType::WChar => "char",
             &PrimitiveType::Bool => "bool",
             &PrimitiveType::USize => "usize",
             &PrimitiveType::UInt8 => "u8",
@@ -111,7 +111,7 @@ impl PrimitiveType {
             &PrimitiveType::Int64 => "i64",
             &PrimitiveType::Float => "f32",
             &PrimitiveType::Double => "f64",
-            &PrimitiveType::SizeT => "size_t",
+            //&PrimitiveType::SizeT => "size_t",
         }
     }
 
@@ -120,7 +120,7 @@ impl PrimitiveType {
             &PrimitiveType::Void => "void",
             &PrimitiveType::Bool => "bool",
             &PrimitiveType::Char => "char",
-            &PrimitiveType::WChar => "wchar_t",
+            //&PrimitiveType::WChar => "wchar_t",
             &PrimitiveType::SChar => "signed char",
             &PrimitiveType::UChar => "unsigned char",
             &PrimitiveType::Short => "short",
@@ -131,7 +131,7 @@ impl PrimitiveType {
             &PrimitiveType::UInt => "unsigned int",
             &PrimitiveType::ULong => "unsigned long",
             &PrimitiveType::ULongLong => "unsigned long long",
-            &PrimitiveType::USize => "size_t",
+            &PrimitiveType::USize => "uintptr_t",
             &PrimitiveType::UInt8 => "uint8_t",
             &PrimitiveType::UInt16 => "uint16_t",
             &PrimitiveType::UInt32 => "uint32_t",
@@ -143,7 +143,7 @@ impl PrimitiveType {
             &PrimitiveType::Int64 => "int64_t",
             &PrimitiveType::Float => "float",
             &PrimitiveType::Double => "double",
-            &PrimitiveType::SizeT => "size_t",
+            //&PrimitiveType::SizeT => "size_t",
         }
     }
 
