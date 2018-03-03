@@ -76,19 +76,20 @@ impl Bindings {
         }
 
         out.new_line_if_not_start();
-        if self.config.language == Language::C {
-            out.write("#include <stdint.h>");
-            out.new_line();
-            out.write("#include <stdlib.h>");
-            out.new_line();
-            out.write("#include <stdbool.h>");
-            out.new_line();
-        } else {
-            out.write("#include <cstdint>");
-            out.new_line();
-            out.write("#include <cstdlib>");
-            out.new_line();
-        }
+        // Disabled to allow generation of stdint.h, stdlib.h, and stdbool.h
+        // if self.config.language == Language::C {
+        //     out.write("#include <stdint.h>");
+        //     out.new_line();
+        //     out.write("#include <stdlib.h>");
+        //     out.new_line();
+        //     out.write("#include <stdbool.h>");
+        //     out.new_line();
+        // } else {
+        //     out.write("#include <cstdint>");
+        //     out.new_line();
+        //     out.write("#include <cstdlib>");
+        //     out.new_line();
+        // }
 
         for include in &self.config.sys_includes {
             write!(out, "#include <{}>", include);
