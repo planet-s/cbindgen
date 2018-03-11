@@ -6,12 +6,12 @@ typedef struct A A;
 
 typedef struct B B;
 
-typedef struct {
+typedef struct List_B {
   B *members;
   uintptr_t count;
 } List_B;
 
-typedef struct {
+typedef struct List_A {
   A *members;
   uintptr_t count;
 } List_A;
