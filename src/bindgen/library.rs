@@ -7,6 +7,7 @@ use std::mem;
 
 use bindgen::bindings::Bindings;
 use bindgen::config::{Config, Language};
+use bindgen::ctyperesolver::CTypeResolver;
 use bindgen::dependencies::Dependencies;
 use bindgen::error::Error;
 use bindgen::ir::{Constant, Enum, Function, Item, ItemContainer, ItemMap};
@@ -60,6 +61,8 @@ impl Library {
 
         if self.config.language == Language::C {
             self.instantiate_monomorphs();
+
+            self.set_ctype();
         }
 
         let mut dependencies = Dependencies::new();
@@ -263,6 +266,49 @@ impl Library {
 
         for item in &mut self.functions {
             item.rename_for_config(&self.config);
+        }
+    }
+
+    fn set_ctype(&mut self) {
+        if self.config.style.generate_typedef() {
+            return;
+        }
+
+        let mut resolver = CTypeResolver::new();
+
+        self.structs.for_all_items(|x| {
+            x.populate_ctyperesolver(&mut resolver);
+        });
+
+        self.opaque_items.for_all_items(|x| {
+            x.populate_ctyperesolver(&mut resolver);
+        });
+
+        self.enums.for_all_items(|x| {
+            x.populate_ctyperesolver(&mut resolver);
+        });
+
+        self.unions.for_all_items(|x| {
+            x.populate_ctyperesolver(&mut resolver);
+        });
+
+        self.enums
+            .for_all_items_mut(|x| x.set_ctype(&resolver));
+
+        self.structs
+            .for_all_items_mut(|x| x.set_ctype(&resolver));
+
+        self.unions
+            .for_all_items_mut(|x| x.set_ctype(&resolver));
+
+        self.typedefs
+            .for_all_items_mut(|x| x.set_ctype(&resolver));
+
+        self.globals
+            .for_all_items_mut(|x| x.set_ctype(&resolver));
+
+        for item in &mut self.functions {
+            item.set_ctype(&resolver);
         }
     }
 

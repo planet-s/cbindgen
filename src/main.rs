@@ -20,7 +20,7 @@ use clap::{App, Arg, ArgMatches};
 mod logging;
 mod bindgen;
 
-use bindgen::{Bindings, Builder, Cargo, Config, Error, Language};
+use bindgen::{Bindings, Builder, Cargo, Config, Error, Language, Style};
 
 fn apply_config_overrides<'a>(config: &mut Config, matches: &ArgMatches<'a>) {
     // We allow specifying a language to override the config default. This is
@@ -36,6 +36,21 @@ fn apply_config_overrides<'a>(config: &mut Config, matches: &ArgMatches<'a>) {
                 return;
             }
         };
+    }
+
+    if let Some(style) = matches.value_of("style") {
+        config.style = match style {
+            "Both" => Style::Both,
+            "both" => Style::Both,
+            "Tag" =>  Style::Tag,
+            "tag" =>  Style::Tag,
+            "Type" => Style::Type,
+            "type" => Style::Type,
+            _ => {
+                error!("Unknown style specified.");
+                return;
+            }
+        }
     }
 
     if matches.is_present("d") {
@@ -61,7 +76,7 @@ fn load_bindings<'a>(input: &Path, matches: &ArgMatches<'a>) -> Result<Bindings,
     }
 
     // We have to load a whole crate, so we use cargo to gather metadata
-    let lib = Cargo::load(input, matches.value_of("crate"), true)?;
+    let lib = Cargo::load(input, matches.value_of("lockfile"), matches.value_of("crate"), true)?;
 
     // Load any config specified or search in the binding crate directory
     let mut config = match matches.value_of("config") {
@@ -112,6 +127,14 @@ fn main() {
                 .possible_values(&["c++", "C++", "c", "C"]),
         )
         .arg(
+            Arg::with_name("style")
+                .short("s")
+                .long("style")
+                .value_name("STYLE")
+                .help("Specify the language to output bindings in")
+                .possible_values(&["Both", "both", "Tag", "tag", "Type", "type"]),
+        )
+        .arg(
             Arg::with_name("d")
                 .short("d")
                 .long("parse-dependencies")
@@ -119,7 +142,10 @@ fn main() {
         )
         .arg(
             Arg::with_name("INPUT")
-                .help("A crate directory or source file to generate bindings for")
+                .help(
+                    "A crate directory or source file to generate bindings for. \
+                    In general this is the folder where the Cargo.toml file of \
+                    source Rust library resides.")
                 .required(false)
                 .index(1),
         )
@@ -139,6 +165,17 @@ fn main() {
                 .long("output")
                 .value_name("PATH")
                 .help("The file to output the bindings to")
+                .required(false),
+        )
+        .arg(
+            Arg::with_name("lockfile")
+                .long("lockfile")
+                .value_name("PATH")
+                .help(
+                    "Specify the path to the Cargo.lock file explicitly. If this \
+                    is not specified, the Cargo.lock file is searched for in the \
+                    same folder as the Cargo.toml file. This option is useful for \
+                    projects that use workspaces.")
                 .required(false),
         )
         .get_matches();

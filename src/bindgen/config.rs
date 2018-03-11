@@ -95,6 +95,50 @@ impl FromStr for Layout {
 
 deserialize_enum_str!(Layout);
 
+/// A style of Style to use when generating structs and enums.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Style {
+    Both,
+    Tag,
+    Type,
+}
+
+impl Style {
+    pub fn generate_tag(&self) -> bool {
+        match self {
+            &Style::Both => true,
+            &Style::Tag => true,
+            &Style::Type => false,
+        }
+    }
+
+    pub fn generate_typedef(&self) -> bool {
+        match self {
+            &Style::Both => true,
+            &Style::Tag => false,
+            &Style::Type => true,
+        }
+    }
+}
+
+impl FromStr for Style {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Style, Self::Err> {
+        match s {
+            "Both" => Ok(Style::Both),
+            "both" => Ok(Style::Both),
+            "Tag" =>  Ok(Style::Tag),
+            "tag" =>  Ok(Style::Tag),
+            "Type" => Ok(Style::Type),
+            "type" => Ok(Style::Type),
+            _ => Err(format!("Unrecognized Style: '{}'.", s)),
+        }
+    }
+}
+
+deserialize_enum_str!(Style);
+
 /// Settings to apply when exporting items.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -140,9 +184,9 @@ impl ExportConfig {
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub struct FunctionConfig {
-    /// Optional text to output before each function declaration
+    /// Optional text to output before each function Style
     pub prefix: Option<String>,
-    /// Optional text to output after each function declaration
+    /// Optional text to output after each function Style
     pub postfix: Option<String>,
     /// The style to layout the args
     pub args: Layout,
@@ -380,6 +424,8 @@ pub struct Config {
     pub tab_width: usize,
     /// The language to output bindings for
     pub language: Language,
+    /// The style to declare structs, enums and unions in for C
+    pub style: Style,
     /// The configuration options for parsing
     pub parse: ParseConfig,
     /// The configuration options for exporting
@@ -418,6 +464,7 @@ impl Default for Config {
             line_length: 100,
             tab_width: 2,
             language: Language::Cxx,
+            style: Style::Type,
             parse: ParseConfig::default(),
             export: ExportConfig::default(),
             function: FunctionConfig::default(),

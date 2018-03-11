@@ -9,6 +9,8 @@
 
 This project can be used to generate C bindings for Rust code. It is currently being developed to support creating bindings for [WebRender](https://github.com/servo/webrender/), but has been designed to support any project.
 
+Note: `cbindgen` temporarily requires `nightly`. See `#147` for information and current status.
+
 ## Features
 
   * Builds bindings for a crate, its mods, its dependent crates, and their mods
@@ -85,6 +87,8 @@ line_length = 80
 tab_width = 2
 # The language to output bindings in
 language = "[C|C++]"
+# A rule to use to select style of declaration in C, tagname vs typedef
+style = "[Both|Type|Tag]"
 
 [parse]
 # Whether to parse dependent crates and include their types in the generated
