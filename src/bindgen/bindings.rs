@@ -133,11 +133,13 @@ impl Bindings {
             out.new_line();
         }
 
-        if self.config.language == Language::Cxx {
-            out.new_line_if_not_start();
-            out.write("extern \"C\" {");
-            out.new_line();
-        }
+        out.new_line_if_not_start();
+        out.write("#ifdef __cplusplus");
+        out.new_line();
+        out.write("extern \"C\" {");
+        out.new_line();
+        out.write("#endif");
+        out.new_line();
 
         for global in &self.globals {
             out.new_line_if_not_start();
@@ -157,11 +159,15 @@ impl Bindings {
             out.new_line();
         }
 
-        if self.config.language == Language::Cxx {
-            out.new_line_if_not_start();
-            out.write("} // extern \"C\"");
-            out.new_line();
+        out.new_line_if_not_start();
+        out.write("#ifdef __cplusplus");
+        out.new_line();
+        out.write("} // extern \"C\"");
+        out.new_line();
+        out.write("#endif");
+        out.new_line();
 
+        if self.config.language == Language::Cxx {
             self.close_namespaces(&mut out);
         }
 
