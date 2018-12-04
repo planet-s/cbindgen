@@ -45,6 +45,7 @@ pub enum PrimitiveType {
     Int64,
     Float,
     Double,
+    VaList,
     //SizeT,
 }
 
@@ -79,6 +80,7 @@ impl PrimitiveType {
             "i64" | "int64_t" => Some(PrimitiveType::Int64),
             "f32" => Some(PrimitiveType::Float),
             "f64" => Some(PrimitiveType::Double),
+            "VaList" => Some(PrimitiveType::VaList),
             //"size_t" => Some(PrimitiveType::SizeT),
             _ => None,
         }
@@ -112,6 +114,7 @@ impl PrimitiveType {
             &PrimitiveType::Int64 => "i64",
             &PrimitiveType::Float => "f32",
             &PrimitiveType::Double => "f64",
+            &PrimitiveType::VaList => "va_list",
             //&PrimitiveType::SizeT => "size_t",
         }
     }
@@ -144,6 +147,7 @@ impl PrimitiveType {
             &PrimitiveType::Int64 => "int64_t",
             &PrimitiveType::Float => "float",
             &PrimitiveType::Double => "double",
+            &PrimitiveType::VaList => "va_list",
             //&PrimitiveType::SizeT => "size_t",
         }
     }
