@@ -58,7 +58,7 @@ impl AnnotationSet {
                 {
                     let comment = comment.value();
                     if &*ident.to_string() == "doc" {
-                        let line = comment.trim_left_matches("///").trim();
+                        let line = comment.trim_start_matches("///").trim();
                         if line.starts_with("cbindgen:") {
                             lines.push(line.to_owned());
                         }
