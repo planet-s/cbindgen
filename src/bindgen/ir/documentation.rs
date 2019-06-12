@@ -38,11 +38,11 @@ impl Documentation {
                     if &*name == "doc" {
                         let line = if attr.is_sugared_doc {
                             comment
-                                .trim_left_matches("/// ")
-                                .trim_left_matches("///")
-                                .trim_right()
+                                .trim_start_matches("/// ")
+                                .trim_start_matches("///")
+                                .trim_end()
                         } else {
-                            comment.trim_left_matches(" ").trim_right()
+                            comment.trim_start_matches(" ").trim_end()
                         };
                         if !line.starts_with("cbindgen:") {
                             doc.push(line.to_owned());
